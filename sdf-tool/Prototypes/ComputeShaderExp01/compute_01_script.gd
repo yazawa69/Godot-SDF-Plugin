@@ -1,7 +1,7 @@
+# from godot docs on compute shading
 extends Node
 
 func _ready() -> void:
-	# from godot docs on compute shading
 	# create a local rendering device
 	var rd : RenderingDevice = RenderingServer.create_local_rendering_device()
 

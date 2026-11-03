@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="sdf-tool"
-run/main_scene="uid://v8kgs6uon2ag"
+run/main_scene="uid://i0kxjjqf5toq"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -23,6 +23,7 @@ window/stretch/aspect="expand"
 [file_customization]
 
 folder_colors={
+"res://GridPlaceholderTextures/": "gray",
 "res://Prototypes/": "gray"
 }
 

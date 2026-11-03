@@ -1,0 +1,78 @@
+[gd_scene format=3 uid="uid://d0ij72720ymci"]
+
+[ext_resource type="Texture2D" uid="uid://dgrtkvl4ntgcd" path="res://GridPlaceholderTextures/Grid_1x1_Blue.png" id="1_arc6x"]
+[ext_resource type="Script" uid="uid://crf04pytqcs2m" path="res://Prototypes/CompositorEffectExp01/post_process_shader.gd" id="1_aukh3"]
+[ext_resource type="Texture2D" uid="uid://dceimobygcfxo" path="res://GridPlaceholderTextures/Grid_1x1_Orange.png" id="2_aukh3"]
+[ext_resource type="Texture2D" uid="uid://dsyus3mwjpebo" path="res://GridPlaceholderTextures/Grid_1x1_Green.png" id="3_ltkcq"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_jjgtl"]
+sky_top_color = Color(0.11975629, 0.60988355, 0.99999994, 1)
+sky_horizon_color = Color(0.86294067, 0.94846606, 1.0090446, 1)
+ground_bottom_color = Color(0.45620453, 0.30817905, 0.16037673, 1)
+ground_horizon_color = Color(0.86294067, 0.94846606, 1.0090446, 1)
+energy_multiplier = 1.05
+
+[sub_resource type="Sky" id="Sky_yk66b"]
+sky_material = SubResource("ProceduralSkyMaterial_jjgtl")
+
+[sub_resource type="Environment" id="Environment_4lte4"]
+background_mode = 2
+sky = SubResource("Sky_yk66b")
+glow_enabled = true
+
+[sub_resource type="CompositorEffect" id="CompositorEffect_aukh3"]
+resource_local_to_scene = false
+resource_name = ""
+enabled = true
+effect_callback_type = 4
+needs_motion_vectors = false
+needs_normal_roughness = false
+script = ExtResource("1_aukh3")
+shader_code = "color.rgb = vec3(color.r * 1.2125, color.g * 0.7154, color.b * 0.0721);"
+metadata/_custom_type_script = "uid://crf04pytqcs2m"
+
+[sub_resource type="Compositor" id="Compositor_arc6x"]
+compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_aukh3")])
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g2ba8"]
+albedo_texture = ExtResource("1_arc6x")
+
+[sub_resource type="SphereMesh" id="SphereMesh_26wlk"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_i11o0"]
+albedo_texture = ExtResource("2_aukh3")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_cbyeo"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8l5dn"]
+albedo_texture = ExtResource("3_ltkcq")
+
+[sub_resource type="BoxMesh" id="BoxMesh_abqvh"]
+
+[node name="Compositor_01_scn" type="Node3D" unique_id=688238377]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=656114931]
+environment = SubResource("Environment_4lte4")
+compositor = SubResource("Compositor_arc6x")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1454405041]
+transform = Transform3D(0.8660254, -0.43301272, 0.25, 0, 0.49999997, 0.86602545, -0.5, -0.75, 0.4330127, 0, 0, 0)
+metadata/_edit_lock_ = true
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1131352395]
+transform = Transform3D(0.91768223, -0.1799921, 0.35420632, 0, 0.8914998, 0.45302105, -0.39731508, -0.41572937, 0.81811357, 1.9849555, 2.2168121, 3.890965)
+
+[node name="Sphere" type="MeshInstance3D" parent="." unique_id=1046036448]
+transform = Transform3D(2.07, 0, 0, 0, 2.07, 0, 0, 0, 2.07, -1.4568772, 1.0941541, -1.7549711)
+material_override = SubResource("StandardMaterial3D_g2ba8")
+mesh = SubResource("SphereMesh_26wlk")
+
+[node name="Ground" type="MeshInstance3D" parent="." unique_id=134688948]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_i11o0")
+mesh = SubResource("PlaneMesh_cbyeo")
+
+[node name="Cube" type="MeshInstance3D" parent="." unique_id=1577812805]
+transform = Transform3D(0.92227215, 0, 0.3865412, 0, 1, 0, -0.3865412, 0, 0.92227215, 1.9479866, 0.52726364, 0)
+material_override = SubResource("StandardMaterial3D_8l5dn")
+mesh = SubResource("BoxMesh_abqvh")
