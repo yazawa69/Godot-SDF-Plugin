@@ -1,0 +1,97 @@
+[gd_scene format=3 uid="uid://i0kxjjqf5toq"]
+
+[ext_resource type="Texture2D" uid="uid://dsyus3mwjpebo" path="res://GridPlaceholderTextures/Grid_1x1_Green.png" id="1_1squk"]
+[ext_resource type="Script" uid="uid://byttm8jxevjgb" path="res://Prototypes/RaymarcherTest/raymarcher_compeffect.gd" id="1_eujvx"]
+[ext_resource type="Texture2D" uid="uid://dgrtkvl4ntgcd" path="res://GridPlaceholderTextures/Grid_1x1_Blue.png" id="2_eujvx"]
+[ext_resource type="Texture2D" uid="uid://c80uxf4gbnw6l" path="res://GridPlaceholderTextures/Grid_1x1_Purple.png" id="3_ot1in"]
+[ext_resource type="Texture2D" uid="uid://b6fgwylhd6h0o" path="res://GridPlaceholderTextures/Grid_1x1_Red.png" id="4_huaw2"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_8451u"]
+sky_top_color = Color(0.11975629, 0.60988355, 0.99999994, 1)
+sky_horizon_color = Color(0.86294067, 0.94846606, 1.0090446, 1)
+ground_bottom_color = Color(0.45620453, 0.30817905, 0.16037673, 1)
+ground_horizon_color = Color(0.86294067, 0.94846606, 1.0090446, 1)
+energy_multiplier = 1.05
+
+[sub_resource type="Sky" id="Sky_lwo6b"]
+sky_material = SubResource("ProceduralSkyMaterial_8451u")
+
+[sub_resource type="Environment" id="Environment_fe4nv"]
+background_mode = 2
+sky = SubResource("Sky_lwo6b")
+glow_enabled = true
+
+[sub_resource type="CompositorEffect" id="CompositorEffect_1squk"]
+resource_local_to_scene = false
+resource_name = ""
+enabled = true
+effect_callback_type = 4
+needs_motion_vectors = false
+needs_normal_roughness = false
+script = ExtResource("1_eujvx")
+sdf_color = Color(0.9882353, 0.29411766, 0, 1)
+metadata/_custom_type_script = "uid://byttm8jxevjgb"
+
+[sub_resource type="Compositor" id="Compositor_8451u"]
+compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_1squk")])
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_16ubb"]
+albedo_texture = ExtResource("1_1squk")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_cbyeo"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_au7tw"]
+albedo_texture = ExtResource("2_eujvx")
+
+[sub_resource type="BoxMesh" id="BoxMesh_cbyeo"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_a5l65"]
+albedo_texture = ExtResource("3_ot1in")
+
+[sub_resource type="TorusMesh" id="TorusMesh_umx8v"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_t3n7n"]
+albedo_texture = ExtResource("4_huaw2")
+
+[sub_resource type="SphereMesh" id="SphereMesh_abqvh"]
+
+[node name="raymarcher_test_scn" type="Node3D" unique_id=1380609366]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=475396282]
+environment = SubResource("Environment_fe4nv")
+compositor = SubResource("Compositor_8451u")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1582958787]
+transform = Transform3D(0.8837031, -0.4539811, 0.11388588, 0, 0.243321, 0.96994585, -0.4680479, -0.8571442, 0.21502353, 0, 0, 0)
+metadata/_edit_lock_ = true
+
+[node name="MeshObjects" type="Node3D" parent="." unique_id=693521995]
+metadata/_edit_lock_ = true
+
+[node name="Plane" type="MeshInstance3D" parent="MeshObjects" unique_id=184796706]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_16ubb")
+mesh = SubResource("PlaneMesh_cbyeo")
+metadata/_edit_lock_ = true
+
+[node name="Cube" type="MeshInstance3D" parent="MeshObjects" unique_id=311045243]
+transform = Transform3D(0.5222093, -0.690244, 0.5008599, 0.49815294, 0.72357666, 0.47778705, -0.6922002, 0, 0.72170556, 2.8793824, 1.2781776, -2.2220483)
+material_override = SubResource("StandardMaterial3D_au7tw")
+mesh = SubResource("BoxMesh_cbyeo")
+metadata/_edit_lock_ = true
+
+[node name="Torus" type="MeshInstance3D" parent="MeshObjects" unique_id=1146514938]
+transform = Transform3D(0.64536536, 0.579715, 0.49742746, -9.581088e-09, 0.6511904, -0.7589144, -0.76387405, 0.4897771, 0.42025566, -2.118503, 1.049485, 1.6031342)
+material_override = SubResource("StandardMaterial3D_a5l65")
+mesh = SubResource("TorusMesh_umx8v")
+metadata/_edit_lock_ = true
+
+[node name="Sphere" type="MeshInstance3D" parent="MeshObjects" unique_id=1758550943]
+transform = Transform3D(1.55, 0, 0, 0, 1.55, 0, 0, 0, 1.55, -0.507874, 1.0031953, -1.5178566)
+material_override = SubResource("StandardMaterial3D_t3n7n")
+mesh = SubResource("SphereMesh_abqvh")
+metadata/_edit_lock_ = true
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1732141759]
+transform = Transform3D(0.8034731, -0.23022445, 0.5490243, 0, 0.9222013, 0.38671017, -0.5953411, -0.31071123, 0.74096394, 2.773701, 2.7266257, 2.7791686)
+metadata/_edit_lock_ = true

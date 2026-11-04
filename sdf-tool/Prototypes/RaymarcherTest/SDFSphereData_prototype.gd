@@ -1,0 +1,2 @@
+extends GeometryInstance3D
+class_name SDFSphere_Prototype
