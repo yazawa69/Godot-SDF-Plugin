@@ -1,10 +1,12 @@
 [gd_scene format=3 uid="uid://i0kxjjqf5toq"]
 
 [ext_resource type="Texture2D" uid="uid://dsyus3mwjpebo" path="res://GridPlaceholderTextures/Grid_1x1_Green.png" id="1_1squk"]
-[ext_resource type="Script" uid="uid://byttm8jxevjgb" path="res://Prototypes/RaymarcherTest/raymarcher_compeffect.gd" id="1_eujvx"]
+[ext_resource type="Script" uid="uid://byttm8jxevjgb" path="res://Prototypes/RaymarcherTest/raymarcher_compeffect.gd" id="1_huaw2"]
+[ext_resource type="Script" uid="uid://dar6m2cjg4qka" path="res://Prototypes/RaymarcherTest/RaymarcherDataHelper.gd" id="1_ot1in"]
 [ext_resource type="Texture2D" uid="uid://dgrtkvl4ntgcd" path="res://GridPlaceholderTextures/Grid_1x1_Blue.png" id="2_eujvx"]
 [ext_resource type="Texture2D" uid="uid://c80uxf4gbnw6l" path="res://GridPlaceholderTextures/Grid_1x1_Purple.png" id="3_ot1in"]
 [ext_resource type="Texture2D" uid="uid://b6fgwylhd6h0o" path="res://GridPlaceholderTextures/Grid_1x1_Red.png" id="4_huaw2"]
+[ext_resource type="Script" uid="uid://cgi501bgeasmm" path="res://Prototypes/RaymarcherTest/SDFSphereData_prototype.gd" id="6_huaw2"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_8451u"]
 sky_top_color = Color(0.11975629, 0.60988355, 0.99999994, 1)
@@ -21,19 +23,18 @@ background_mode = 2
 sky = SubResource("Sky_lwo6b")
 glow_enabled = true
 
-[sub_resource type="CompositorEffect" id="CompositorEffect_1squk"]
+[sub_resource type="CompositorEffect" id="CompositorEffect_3bi6q"]
 resource_local_to_scene = false
 resource_name = ""
 enabled = true
 effect_callback_type = 4
 needs_motion_vectors = false
 needs_normal_roughness = false
-script = ExtResource("1_eujvx")
-sdf_color = Color(0.9882353, 0.29411766, 0, 1)
+script = ExtResource("1_huaw2")
 metadata/_custom_type_script = "uid://byttm8jxevjgb"
 
-[sub_resource type="Compositor" id="Compositor_8451u"]
-compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_1squk")])
+[sub_resource type="Compositor" id="Compositor_i3k7r"]
+compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_3bi6q")])
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_16ubb"]
 albedo_texture = ExtResource("1_1squk")
@@ -55,15 +56,18 @@ albedo_texture = ExtResource("4_huaw2")
 
 [sub_resource type="SphereMesh" id="SphereMesh_abqvh"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_r7oyd"]
+albedo_color = Color(0, 0.526179, 0.48927754, 1)
+
 [node name="raymarcher_test_scn" type="Node3D" unique_id=1380609366]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=475396282]
 environment = SubResource("Environment_fe4nv")
-compositor = SubResource("Compositor_8451u")
+compositor = SubResource("Compositor_i3k7r")
+script = ExtResource("1_ot1in")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1582958787]
-transform = Transform3D(0.8837031, -0.4539811, 0.11388588, 0, 0.243321, 0.96994585, -0.4680479, -0.8571442, 0.21502353, 0, 0, 0)
-metadata/_edit_lock_ = true
+transform = Transform3D(0.9431392, -0.3320273, 0.015692495, 0.14023498, 0.44025904, 0.8868519, -0.30136776, -0.8342242, 0.4617874, 0, 5.1009493, 0)
 
 [node name="MeshObjects" type="Node3D" parent="." unique_id=693521995]
 metadata/_edit_lock_ = true
@@ -92,6 +96,41 @@ material_override = SubResource("StandardMaterial3D_t3n7n")
 mesh = SubResource("SphereMesh_abqvh")
 metadata/_edit_lock_ = true
 
-[node name="Camera3D" type="Camera3D" parent="." unique_id=1732141759]
-transform = Transform3D(0.8034731, -0.23022445, 0.5490243, 0, 0.9222013, 0.38671017, -0.5953411, -0.31071123, 0.74096394, 2.773701, 2.7266257, 2.7791686)
-metadata/_edit_lock_ = true
+[node name="SDFSphere_Prototype" type="GeometryInstance3D" parent="." unique_id=1509255311]
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 0
+auto_translate_mode = 0
+editor_description = ""
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
+rotation_edit_mode = 0
+rotation_order = 2
+top_level = false
+visible = true
+visibility_parent = NodePath("")
+layers = 0
+sorting_offset = 0.0
+sorting_use_aabb_center = true
+material_override = SubResource("StandardMaterial3D_r7oyd")
+material_overlay = null
+transparency = 0.0
+cast_shadow = 1
+extra_cull_margin = 0.0
+custom_aabb = AABB(0, 0, 0, 0, 0, 0)
+lod_bias = 1.0
+ignore_occlusion_culling = false
+gi_mode = 1
+gi_lightmap_texel_scale = 1.0
+visibility_range_begin = 0.0
+visibility_range_begin_margin = 0.0
+visibility_range_end = 0.0
+visibility_range_end_margin = 0.0
+visibility_range_fade_mode = 0
+script = ExtResource("6_huaw2")
+metadata/_custom_type_script = "uid://cgi501bgeasmm"
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1595831040]
+transform = Transform3D(0.8012538, -0.1799198, 0.5706323, 0, 0.9537169, 0.300706, -0.5983246, -0.24094182, 0.7641693, 2.9103026, 2.2452464, 3.7106986)

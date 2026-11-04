@@ -2,10 +2,16 @@
 class_name PostProcessRaymarcher
 extends CompositorEffect
 
-@export var sdf_transform: Vector3
-@export var sdf_rotation: Vector3
-@export var sdf_scaling: Vector3 = Vector3.ONE
-@export var sdf_color: Color = Color.WHITE
+# example sdf
+var sdf_transform: Vector3
+var sdf_rotation: Vector3
+var sdf_scaling: Vector3 = Vector3.ONE
+var sdf_color: Color = Color.WHITE
+
+# example light
+var light_direction: Vector3
+var light_color: Vector3
+var light_intensity: float
 
 var rd: RenderingDevice
 var shader: RID
@@ -50,6 +56,7 @@ func _initialize_compute() -> void:
 # Called by the rendering thread every frame.
 func _render_callback(p_effect_callback_type: EffectCallbackType, p_render_data: RenderData) -> void:
 	if rd and p_effect_callback_type == EFFECT_CALLBACK_TYPE_POST_TRANSPARENT and pipeline.is_valid():
+		var scene_data := p_render_data.get_render_scene_data()
 		# Get our render scene buffers object, this gives us access to our render buffers.
 		# Note that implementation differs per renderer hence the need for the cast.
 		var render_scene_buffers := p_render_data.get_render_scene_buffers()
@@ -100,7 +107,32 @@ func _render_callback(p_effect_callback_type: EffectCallbackType, p_render_data:
 				params_uniform.binding = 1
 				params_uniform.add_id(params_buffer)
 				
-				var bindings: Array = [uniform, params_uniform]
+				# cam buffer (probably better to do it with push constants)
+				var cam_to_world := Projection(scene_data.get_cam_transform())
+				var inv_proj := scene_data.get_view_projection(view).inverse()
+				var cam_bytes := PackedByteArray()
+				cam_bytes.append_array(matrix_to_bytes(cam_to_world))
+				cam_bytes.append_array(matrix_to_bytes(inv_proj))
+				var cam_buffer = rd.storage_buffer_create(cam_bytes.size(), cam_bytes)
+				var cam_uniform := RDUniform.new()
+				cam_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+				cam_uniform.binding = 2
+				cam_uniform.add_id(cam_buffer)
+				
+				# light buffer
+				light_direction = light_direction.normalized()
+				var l_bytes := PackedFloat32Array([
+					light_direction.x, light_direction.y, light_direction.z, 0.0,
+					light_color.x, light_color.y, light_color.z, 0.0,
+					light_intensity, 0.0, 0.0, 0.0,
+				]).to_byte_array()
+				var l_buffer = rd.storage_buffer_create(l_bytes.size(), l_bytes)
+				var l_uniform := RDUniform.new()
+				l_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+				l_uniform.binding = 3
+				l_uniform.add_id(l_buffer)
+				
+				var bindings: Array = [uniform, params_uniform, cam_uniform, l_uniform]
 				
 				var uniform_set := UniformSetCacheRD.get_cache(shader, 0, bindings)
 
@@ -112,3 +144,11 @@ func _render_callback(p_effect_callback_type: EffectCallbackType, p_render_data:
 				rd.compute_list_dispatch(compute_list, x_groups, y_groups, z_groups)
 				rd.compute_list_end()
 #endregion
+
+func matrix_to_bytes(p: Projection) -> PackedByteArray:
+	return PackedFloat32Array([
+		p.x.x, p.x.y, p.x.z, p.x.w,
+		p.y.x, p.y.y, p.y.z, p.y.w,
+		p.z.x, p.z.y, p.z.z, p.z.w,
+		p.w.x, p.w.y, p.w.z, p.w.w
+	]).to_byte_array()

@@ -12,6 +12,17 @@ layout(set = 0, binding = 1) restrict buffer SDFParams {
     vec4 color;
 } sdf_params;
 
+layout(set = 0, binding = 2) restrict buffer CameraData {
+    mat4 toWorld;
+    mat4 invProj;
+} cam_data;
+
+layout(set = 0, binding = 3) restrict buffer DirectionalLight {
+    vec3 dir; float _pad0;
+    vec3 col; float _pad1;
+    float intensity;
+} dir_light;
+
 layout(push_constant, std430) uniform Params {
 	vec2 raster_size;
 	vec2 reserved;
@@ -19,6 +30,15 @@ layout(push_constant, std430) uniform Params {
 
 float map(in vec3 pos) {
     return length(pos-sdf_params.translation)-(.25*sdf_params.scaling.x);
+}
+
+vec3 calcNormals(in vec3 pos) {
+    const float eps = 0.0001;
+    const vec2 h = vec2(eps, 0);
+    return normalize(vec3(map(pos+h.xyy)-map(pos-h.xyy),
+                          map(pos+h.yxy)-map(pos-h.yxy),
+                          map(pos+h.yyx)-map(pos-h.yyx)
+                         ));
 }
 
 void main() {
@@ -40,8 +60,10 @@ void main() {
     uv.y = -uv.y;
 
     // init
-    vec3 ro = vec3(0., 0., 2.);
-    vec3 rd = normalize(vec3(uv, -1.5));
+    vec2 ndc = (vec2(invID) + 0.5) / vec2(size) * 2.0 - 1.0;
+    vec4 view_dir = cam_data.invProj * vec4(ndc, 1.0, 1.0);
+    vec3 rd = normalize((cam_data.toWorld*vec4(normalize(view_dir.xyz/view_dir.w), 0.0)).xyz);
+    vec3 ro = cam_data.toWorld[3].xyz;
     
     vec4 col = vec4(0.0, 0.0, 0.0, 0.0);
 
@@ -57,7 +79,17 @@ void main() {
 
     // coloring
     if (t<20.0) {
+        vec3 pos = ro + rd * t;
+        vec3 normal = calcNormals(pos);
+
+        float light_diff = clamp(dot(dir_light.dir, normal), 0.0, 1.0);
+        float sky_diff = clamp(0.25 + 0.5 * dot(normal, vec3(0.0, 1.0, 0.0)), 0.0, 1.0);
+
         col = sdf_params.color;
+        col.rgb *= dir_light.col * light_diff;
+        col.rgb += vec3(0.0, 0.0, 0.01) * sky_diff;
+        col.rgb += .15*sdf_params.color.rgb;
+        col.rgb *= dir_light.intensity;
     }
 
     // color output
