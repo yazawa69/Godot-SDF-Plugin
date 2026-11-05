@@ -23,6 +23,8 @@ layout(set = 0, binding = 3) restrict buffer DirectionalLight {
     float intensity;
 } dir_light;
 
+layout(set = 0, binding = 4) uniform sampler2D depth_sampler;
+
 layout(push_constant, std430) uniform Params {
 	vec2 raster_size;
 	vec2 reserved;
@@ -60,10 +62,23 @@ void main() {
     uv.y = -uv.y;
 
     // init
+    float tmax = 20.0; // far plane clip distance
     vec2 ndc = (vec2(invID) + 0.5) / vec2(size) * 2.0 - 1.0;
     vec4 view_dir = cam_data.invProj * vec4(ndc, 1.0, 1.0);
-    vec3 rd = normalize((cam_data.toWorld*vec4(normalize(view_dir.xyz/view_dir.w), 0.0)).xyz);
+    vec3 rd_view = normalize(view_dir.xyz/view_dir.w); // view-space ray direction (also used below for depth)
+    vec3 rd = normalize((cam_data.toWorld*vec4(rd_view, 0.0)).xyz);
     vec3 ro = cam_data.toWorld[3].xyz;
+
+    // sample depth
+    float depth = texelFetch(depth_sampler, invID, 0).r;
+    float linear_depth = 0.0; // depth buffer
+    float scene_t = 1e9; // ray distance
+    if (depth > 0.0) {
+        vec4 view_depth = cam_data.invProj*vec4(ndc, depth, 1.0);
+        linear_depth = -(view_depth.z/view_depth.w);
+        scene_t = linear_depth / max(-rd_view.z, 1e-4);
+        tmax = min(tmax, scene_t);
+    }
     
     vec4 col = vec4(0.0, 0.0, 0.0, 0.0);
 
@@ -78,7 +93,7 @@ void main() {
     }
 
     // coloring
-    if (t<20.0) {
+    if (t<tmax) {
         vec3 pos = ro + rd * t;
         vec3 normal = calcNormals(pos);
 
@@ -93,6 +108,8 @@ void main() {
     }
 
     // color output
+    //color = vec4(vec3(linear_depth / 20.0), 1.0); // output depth buffer
+    //color = vec4(vec3(scene_t / 20.0), 1.0); // output ray distance
 	color = vec4(mix(color.rgb, col.rgb, col.a), 1.0);
     // ---------------------------------
 

@@ -3,25 +3,32 @@ class_name PostProcessRaymarcher
 extends CompositorEffect
 
 # example sdf
+var params_buffer: RID
 var sdf_transform: Vector3
 var sdf_rotation: Vector3
 var sdf_scaling: Vector3 = Vector3.ONE
 var sdf_color: Color = Color.WHITE
 
 # example light
+var light_buffer: RID
 var light_direction: Vector3
 var light_color: Vector3
 var light_intensity: float
+
+# cam
+var cam_buffer: RID
 
 var rd: RenderingDevice
 var shader: RID
 var pipeline: RID
 
-var params_buffer: RID
+# created once for depth
+var nearest_sampler: RID
 
 
 func _init() -> void:
-	effect_callback_type = EFFECT_CALLBACK_TYPE_POST_TRANSPARENT
+	self.effect_callback_type = EFFECT_CALLBACK_TYPE_POST_TRANSPARENT
+	self.access_resolved_depth = true
 	rd = RenderingServer.get_rendering_device()
 	RenderingServer.call_on_render_thread(_initialize_compute)
 
@@ -33,6 +40,9 @@ func _notification(what: int) -> void:
 		if shader.is_valid():
 			# Freeing our shader will also free any dependents such as the pipeline!
 			rd.free_rid(shader)
+		if light_buffer.is_valid(): rd.free_rid(light_buffer)
+		if cam_buffer.is_valid(): rd.free_rid(cam_buffer)
+		if params_buffer.is_valid(): rd.free_rid(params_buffer)
 
 
 #region Code in this region runs on the rendering thread.
@@ -50,13 +60,21 @@ func _initialize_compute() -> void:
 	if shader.is_valid():
 		pipeline = rd.compute_pipeline_create(shader)
 	
+	# TODO: always create the buffers in init and only update it in _render_callback() or check if .is_valid() in _render_callback()
 	params_buffer = rd.storage_buffer_create(64) # 4^6 byte stores exactly 16 Float32's
+	
+	# create once for depth sampler
+	var ss := RDSamplerState.new()
+	ss.min_filter = RenderingDevice.SAMPLER_FILTER_NEAREST
+	ss.mag_filter = RenderingDevice.SAMPLER_FILTER_NEAREST
+	nearest_sampler = rd.sampler_create(ss)
 
 
 # Called by the rendering thread every frame.
 func _render_callback(p_effect_callback_type: EffectCallbackType, p_render_data: RenderData) -> void:
 	if rd and p_effect_callback_type == EFFECT_CALLBACK_TYPE_POST_TRANSPARENT and pipeline.is_valid():
 		var scene_data := p_render_data.get_render_scene_data()
+		var buffers : RenderSceneBuffersRD = p_render_data.get_render_scene_buffers()
 		# Get our render scene buffers object, this gives us access to our render buffers.
 		# Note that implementation differs per renderer hence the need for the cast.
 		var render_scene_buffers := p_render_data.get_render_scene_buffers()
@@ -75,20 +93,14 @@ func _render_callback(p_effect_callback_type: EffectCallbackType, p_render_data:
 
 			# Create push constant.
 			# Must be aligned to 16 bytes and be in the same order as defined in the shader.
-			var push_constant := PackedFloat32Array([
-					size.x,
-					size.y,
-					0.0,
-					0.0,
-				])
+			var push_constant := PackedFloat32Array([size.x, size.y, 0.0, 0.0])
 
 			# Loop through views just in case we're doing stereo rendering. No extra cost if this is mono.
 			var view_count: int = render_scene_buffers.get_view_count()
 			for view in view_count:
-				# Get the RID for our color image, we will be reading from and writing to it.
-				var input_image: RID = render_scene_buffers.get_color_layer(view)
 
 				# Create a uniform set, this will be cached, the cache will be cleared if our viewports configuration is changed.
+				var input_image: RID = render_scene_buffers.get_color_layer(view)
 				var uniform := RDUniform.new()
 				uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
 				uniform.binding = 0
@@ -113,26 +125,41 @@ func _render_callback(p_effect_callback_type: EffectCallbackType, p_render_data:
 				var cam_bytes := PackedByteArray()
 				cam_bytes.append_array(matrix_to_bytes(cam_to_world))
 				cam_bytes.append_array(matrix_to_bytes(inv_proj))
-				var cam_buffer = rd.storage_buffer_create(cam_bytes.size(), cam_bytes)
+				if not cam_buffer.is_valid():
+					cam_buffer = rd.storage_buffer_create(cam_bytes.size(), cam_bytes)
+				else: 
+					rd.buffer_update(cam_buffer, 0, cam_bytes.size(), cam_bytes)
 				var cam_uniform := RDUniform.new()
 				cam_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
 				cam_uniform.binding = 2
 				cam_uniform.add_id(cam_buffer)
 				
-				# light buffer
+				# light buffer (probably better as push constant)
 				light_direction = light_direction.normalized()
 				var l_bytes := PackedFloat32Array([
 					light_direction.x, light_direction.y, light_direction.z, 0.0,
 					light_color.x, light_color.y, light_color.z, 0.0,
 					light_intensity, 0.0, 0.0, 0.0,
 				]).to_byte_array()
-				var l_buffer = rd.storage_buffer_create(l_bytes.size(), l_bytes)
+				if not light_buffer.is_valid():
+					light_buffer = rd.storage_buffer_create(l_bytes.size(), l_bytes)
+				else:
+					rd.buffer_update(light_buffer, 0, l_bytes.size(), l_bytes)
 				var l_uniform := RDUniform.new()
 				l_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
 				l_uniform.binding = 3
-				l_uniform.add_id(l_buffer)
+				l_uniform.add_id(light_buffer)
 				
-				var bindings: Array = [uniform, params_uniform, cam_uniform, l_uniform]
+				# Depth Texture uniform
+				var depth_tex = buffers.get_depth_layer(view)
+				var depth_uniform := RDUniform.new()
+				depth_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
+				depth_uniform.binding = 4
+				depth_uniform.add_id(nearest_sampler)
+				depth_uniform.add_id(depth_tex)
+				
+				var bindings: Array = [uniform, params_uniform, cam_uniform, 
+										l_uniform, depth_uniform]
 				
 				var uniform_set := UniformSetCacheRD.get_cache(shader, 0, bindings)
 

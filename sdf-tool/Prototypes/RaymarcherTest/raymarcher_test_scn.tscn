@@ -5,7 +5,6 @@
 [ext_resource type="Script" uid="uid://dar6m2cjg4qka" path="res://Prototypes/RaymarcherTest/RaymarcherDataHelper.gd" id="1_ot1in"]
 [ext_resource type="Texture2D" uid="uid://dgrtkvl4ntgcd" path="res://GridPlaceholderTextures/Grid_1x1_Blue.png" id="2_eujvx"]
 [ext_resource type="Texture2D" uid="uid://c80uxf4gbnw6l" path="res://GridPlaceholderTextures/Grid_1x1_Purple.png" id="3_ot1in"]
-[ext_resource type="Texture2D" uid="uid://b6fgwylhd6h0o" path="res://GridPlaceholderTextures/Grid_1x1_Red.png" id="4_huaw2"]
 [ext_resource type="Script" uid="uid://cgi501bgeasmm" path="res://Prototypes/RaymarcherTest/SDFSphereData_prototype.gd" id="6_huaw2"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_8451u"]
@@ -37,11 +36,14 @@ metadata/_custom_type_script = "uid://byttm8jxevjgb"
 compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_3bi6q")])
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_16ubb"]
+cull_mode = 2
 albedo_texture = ExtResource("1_1squk")
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_cbyeo"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_au7tw"]
+transparency = 4
+albedo_color = Color(1, 1, 1, 0.8)
 albedo_texture = ExtResource("2_eujvx")
 
 [sub_resource type="BoxMesh" id="BoxMesh_cbyeo"]
@@ -51,13 +53,13 @@ albedo_texture = ExtResource("3_ot1in")
 
 [sub_resource type="TorusMesh" id="TorusMesh_umx8v"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_t3n7n"]
-albedo_texture = ExtResource("4_huaw2")
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_huaw2"]
+albedo_color = Color(0.95686275, 0.12941177, 0.08235294, 1)
 
 [sub_resource type="SphereMesh" id="SphereMesh_abqvh"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_r7oyd"]
-albedo_color = Color(0, 0.526179, 0.48927754, 1)
+albedo_color = Color(0.95686275, 0.12941177, 0.08235294, 1)
 
 [node name="raymarcher_test_scn" type="Node3D" unique_id=1380609366]
 
@@ -67,7 +69,7 @@ compositor = SubResource("Compositor_i3k7r")
 script = ExtResource("1_ot1in")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1582958787]
-transform = Transform3D(0.9431392, -0.3320273, 0.015692495, 0.14023498, 0.44025904, 0.8868519, -0.30136776, -0.8342242, 0.4617874, 0, 5.1009493, 0)
+transform = Transform3D(0.89048374, -0.0861215, -0.44679022, 0.42645848, 0.50034916, 0.75351423, 0.15865767, -0.8615298, 0.4822805, 0, 5.1009493, 0)
 
 [node name="MeshObjects" type="Node3D" parent="." unique_id=693521995]
 metadata/_edit_lock_ = true
@@ -82,7 +84,6 @@ metadata/_edit_lock_ = true
 transform = Transform3D(0.5222093, -0.690244, 0.5008599, 0.49815294, 0.72357666, 0.47778705, -0.6922002, 0, 0.72170556, 2.8793824, 1.2781776, -2.2220483)
 material_override = SubResource("StandardMaterial3D_au7tw")
 mesh = SubResource("BoxMesh_cbyeo")
-metadata/_edit_lock_ = true
 
 [node name="Torus" type="MeshInstance3D" parent="MeshObjects" unique_id=1146514938]
 transform = Transform3D(0.64536536, 0.579715, 0.49742746, -9.581088e-09, 0.6511904, -0.7589144, -0.76387405, 0.4897771, 0.42025566, -2.118503, 1.049485, 1.6031342)
@@ -92,7 +93,7 @@ metadata/_edit_lock_ = true
 
 [node name="Sphere" type="MeshInstance3D" parent="MeshObjects" unique_id=1758550943]
 transform = Transform3D(1.55, 0, 0, 0, 1.55, 0, 0, 0, 1.55, -0.507874, 1.0031953, -1.5178566)
-material_override = SubResource("StandardMaterial3D_t3n7n")
+material_override = SubResource("StandardMaterial3D_huaw2")
 mesh = SubResource("SphereMesh_abqvh")
 metadata/_edit_lock_ = true
 
@@ -105,11 +106,11 @@ process_thread_group = 0
 physics_interpolation_mode = 0
 auto_translate_mode = 0
 editor_description = ""
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
+transform = Transform3D(3.33, 0, 0, 0, 3.33, 0, 0, 0, 3.33, 1.4461539, 0.43769276, 0.13243204)
 rotation_edit_mode = 0
 rotation_order = 2
 top_level = false
-visible = true
+visible = false
 visibility_parent = NodePath("")
 layers = 0
 sorting_offset = 0.0
@@ -120,7 +121,7 @@ transparency = 0.0
 cast_shadow = 1
 extra_cull_margin = 0.0
 custom_aabb = AABB(0, 0, 0, 0, 0, 0)
-lod_bias = 1.0
+lod_bias = 0.001
 ignore_occlusion_culling = false
 gi_mode = 1
 gi_lightmap_texel_scale = 1.0
