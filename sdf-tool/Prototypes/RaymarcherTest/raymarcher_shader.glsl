@@ -1,6 +1,8 @@
 #[compute]
 #version 450
 
+#define SPHERE(p, r) (length(p) - r*.5) // .5 to keep godot units
+
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
 layout(rgba16f, set = 0, binding = 0) uniform image2D color_image;
@@ -31,7 +33,7 @@ layout(push_constant, std430) uniform Params {
 } params;
 
 float map(in vec3 pos) {
-    return length(pos-sdf_params.translation)-(.25*sdf_params.scaling.x);
+    return SPHERE(pos-sdf_params.translation, sdf_params.scaling.x);
 }
 
 vec3 calcNormals(in vec3 pos) {
@@ -62,7 +64,7 @@ void main() {
     uv.y = -uv.y;
 
     // init
-    float tmax = 20.0; // far plane clip distance
+    float tmax = 50.0; // far plane clip distance
     vec2 ndc = (vec2(invID) + 0.5) / vec2(size) * 2.0 - 1.0;
     vec4 view_dir = cam_data.invProj * vec4(ndc, 1.0, 1.0);
     vec3 rd_view = normalize(view_dir.xyz/view_dir.w); // view-space ray direction (also used below for depth)
@@ -89,10 +91,11 @@ void main() {
         float d = map(pos);
         if (d<.0001) break;
         t += d;
-        if (t>20.0) break;
+        if (t>tmax) break;
     }
 
     // coloring
+    //TODO: use hit flag instead of t<tmax, because at grazing angles we get black outlines
     if (t<tmax) {
         vec3 pos = ro + rd * t;
         vec3 normal = calcNormals(pos);

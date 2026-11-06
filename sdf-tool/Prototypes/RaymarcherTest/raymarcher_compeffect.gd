@@ -27,7 +27,7 @@ var nearest_sampler: RID
 
 
 func _init() -> void:
-	self.effect_callback_type = EFFECT_CALLBACK_TYPE_POST_TRANSPARENT
+	self.effect_callback_type = EFFECT_CALLBACK_TYPE_PRE_TRANSPARENT
 	self.access_resolved_depth = true
 	rd = RenderingServer.get_rendering_device()
 	RenderingServer.call_on_render_thread(_initialize_compute)
@@ -72,7 +72,7 @@ func _initialize_compute() -> void:
 
 # Called by the rendering thread every frame.
 func _render_callback(p_effect_callback_type: EffectCallbackType, p_render_data: RenderData) -> void:
-	if rd and p_effect_callback_type == EFFECT_CALLBACK_TYPE_POST_TRANSPARENT and pipeline.is_valid():
+	if rd and pipeline.is_valid():
 		var scene_data := p_render_data.get_render_scene_data()
 		var buffers : RenderSceneBuffersRD = p_render_data.get_render_scene_buffers()
 		# Get our render scene buffers object, this gives us access to our render buffers.

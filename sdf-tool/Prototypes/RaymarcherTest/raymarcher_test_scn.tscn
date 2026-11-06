@@ -26,7 +26,9 @@ glow_enabled = true
 resource_local_to_scene = false
 resource_name = ""
 enabled = true
-effect_callback_type = 4
+effect_callback_type = 3
+access_resolved_color = false
+access_resolved_depth = true
 needs_motion_vectors = false
 needs_normal_roughness = false
 script = ExtResource("1_huaw2")
@@ -59,7 +61,7 @@ albedo_color = Color(0.95686275, 0.12941177, 0.08235294, 1)
 [sub_resource type="SphereMesh" id="SphereMesh_abqvh"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_r7oyd"]
-albedo_color = Color(0.95686275, 0.12941177, 0.08235294, 1)
+albedo_color = Color(0.94509804, 0.11372549, 0, 1)
 
 [node name="raymarcher_test_scn" type="Node3D" unique_id=1380609366]
 
@@ -84,6 +86,7 @@ metadata/_edit_lock_ = true
 transform = Transform3D(0.5222093, -0.690244, 0.5008599, 0.49815294, 0.72357666, 0.47778705, -0.6922002, 0, 0.72170556, 2.8793824, 1.2781776, -2.2220483)
 material_override = SubResource("StandardMaterial3D_au7tw")
 mesh = SubResource("BoxMesh_cbyeo")
+metadata/_edit_lock_ = true
 
 [node name="Torus" type="MeshInstance3D" parent="MeshObjects" unique_id=1146514938]
 transform = Transform3D(0.64536536, 0.579715, 0.49742746, -9.581088e-09, 0.6511904, -0.7589144, -0.76387405, 0.4897771, 0.42025566, -2.118503, 1.049485, 1.6031342)
@@ -92,10 +95,9 @@ mesh = SubResource("TorusMesh_umx8v")
 metadata/_edit_lock_ = true
 
 [node name="Sphere" type="MeshInstance3D" parent="MeshObjects" unique_id=1758550943]
-transform = Transform3D(1.55, 0, 0, 0, 1.55, 0, 0, 0, 1.55, -0.507874, 1.0031953, -1.5178566)
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -0.507874, 1.0031953, -1.8618357)
 material_override = SubResource("StandardMaterial3D_huaw2")
 mesh = SubResource("SphereMesh_abqvh")
-metadata/_edit_lock_ = true
 
 [node name="SDFSphere_Prototype" type="GeometryInstance3D" parent="." unique_id=1509255311]
 unique_name_in_owner = false
@@ -106,7 +108,7 @@ process_thread_group = 0
 physics_interpolation_mode = 0
 auto_translate_mode = 0
 editor_description = ""
-transform = Transform3D(3.33, 0, 0, 0, 3.33, 0, 0, 0, 3.33, 1.4461539, 0.43769276, 0.13243204)
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0.45440793, 0.03354466, 1.15128)
 rotation_edit_mode = 0
 rotation_order = 2
 top_level = false
